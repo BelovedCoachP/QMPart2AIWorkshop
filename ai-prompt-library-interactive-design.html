@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Prompt Library for Interactive Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(15px);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+            color: white;
+            padding: 60px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 25px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .search-section {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .search-section::before {
+            content: '🔍';
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+        
+        .search-title {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        .filter-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .filter-tag:hover, .filter-tag.active {
+            background: white;
+            color: #0984e3;
+            border-color: white;
+        }
+        
+        .prompt-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .category-card {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            border: 3px solid transparent;
+            transition: all 0.4s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .category-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+            z-index: -1;
+            transition: opacity 0.4s ease;
+            opacity: 0;
+        }
+        
+        .category-card:hover::before {
+            opacity: 1;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-10px);
+            border-color: transparent;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+        }
+        
+        .category-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .category-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .category-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .category-desc {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+        
+        .prompt-count {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .prompt-list {
+            padding: 30px;
+        }
+        
+        .prompt-item {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .prompt-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .prompt-title {
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .difficulty-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .difficulty-beginner {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .difficulty-intermediate {
+            background: #fed7aa;
+            color: #9c4221;
+        }
+        
+        .difficulty-advanced {
+            background: #fbb6ce;
+            color: #97266d;
+        }
+        
+        .prompt-preview {
+            color: #4a5568;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            font-style: italic;
+        }
+        
+        .prompt-full {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin: 15px 0;
+            display: none;
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background: #5a67d8;
+            transform: scale(1.05);
+        }
+        
+        .prompt-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .prompt-tag {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .expand-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .expand-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .quick-start {
+            background: linear-gradient(135deg, #00cec9 0%, #55a3ff 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .quick-start h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+        
+        .quick-start p {
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+            opacity: 0.95;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .action-btn {
+            background: white;
+            color: #00cec9;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tips-section {
+            background: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%);
+            padding: 30px;
+            border-radius: 20px;
+            margin: 40px 0;
+            color: white;
+        }
+        
+        .tips-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .tip-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .tip-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .tip-item h4 {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .tip-item p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            opacity: 0.95;
+        }
+        
+        @media (max-width: 768px) {
+            .content { padding: 30px 20px; }
+            .header { padding: 40px 20px; }
+            .header h1 { font-size: 2.5rem; }
+            .prompt-categories { grid-template-columns: 1fr; }
+            .stats-bar { flex-direction: column; gap: 15px; }
+            .action-buttons { flex-direction: column; align-items: center; }
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .action-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 AI Prompt Library</h1>
+            <p>Your comprehensive collection of tested AI prompts for creating engaging interactive educational content</p>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-number">50+</span>
+                    <span class="stat-label">Ready-to-Use Prompts</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">8</span>
+                    <span class="stat-label">Activity Categories</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">Difficulty Levels</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <!-- Search and Filter Section -->
+            <div class="search-section">
+                <h2 class="search-title">🔍 Find the Perfect Prompt</h2>
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="Search prompts by keyword, activity type, or subject...">
+                </div>
+                <div class="filter-tags">
+                    <div class="filter-tag active" onclick="filterPrompts('all')">All</div>
+                    <div class="filter-tag" onclick="filterPrompts('beginner')">Beginner</div>
+                    <div class="filter-tag" onclick="filterPrompts('intermediate')">Intermediate</div>
+                    <div class="filter-tag" onclick="filterPrompts('advanced')">Advanced</div>
+                    <div class="filter-tag" onclick="filterPrompts('quiz')">Quizzes</div>
+                    <div class="filter-tag" onclick="filterPrompts('scenario')">Scenarios</div>
+                    <div class="filter-tag" onclick="filterPrompts('simulation')">Simulations</div>
+                </div>
+            </div>
+
+            <!-- Prompt Categories -->
+            <div class="prompt-categories">
+                <!-- Interactive Quizzes -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">❓</span>
+                        <div class="prompt-count">12 prompts</div>
+                        <h3 class="category-title">Interactive Quizzes & Assessments</h3>
+                        <p class="category-desc">Generate engaging quizzes, polls, and knowledge checks that adapt to learner responses</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Adaptive Multiple Choice Generator
+                                <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                            </div>
+                            <p class="prompt-preview">Creates multiple choice questions that adjust difficulty based on performance...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+You are an expert educational content creator specializing in adaptive assessments. Create a multiple-choice quiz on [TOPIC] for [AUDIENCE LEVEL] learners.
+
+Requirements:
+- Generate 5-7 questions that progressively increase in difficulty
+- Each question should have 4 answer choices with only one correct answer
+- Include plausible distractors that reveal common misconceptions
+- Provide detailed explanations for both correct and incorrect answers
+- Add a difficulty rating (1-5) for each question
+- Include adaptive logic: "If learner scores <60% on questions 1-3, provide remedial content before continuing"
+
+Topic: [INSERT TOPIC]
+Audience: [INSERT AUDIENCE LEVEL]
+Learning Objective: [INSERT SPECIFIC LEARNING GOAL]
+
+Format the output as:
+**Question [#]** (Difficulty: [1-5])
+[Question text]
+A) [Option A]
+B) [Option B] 
+C) [Option C]
+D) [Option D]
+
+**Correct Answer:** [Letter]
+**Explanation:** [Why this is correct and why others are wrong]
+**Remedial Tip:** [Additional help if needed]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Assessment</span>
+                                <span class="prompt-tag">Adaptive</span>
+                                <span class="prompt-tag">Multiple Choice</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Interactive Poll Creator
+                                <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                            </div>
+                            <p class="prompt-preview">Generates engaging polls and surveys for real-time audience participation...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create an interactive polling sequence for a [DURATION] learning session on [TOPIC].
+
+Design Requirements:
+- 3-5 poll questions that build upon each other
+- Mix of question types: multiple choice, ranking, word cloud, and rating scale
+- Include icebreaker polls, knowledge checks, and opinion polls
+- Provide suggested timing for each poll
+- Include follow-up discussion prompts based on expected responses
+
+Session Context:
+Topic: [INSERT TOPIC]
+Audience: [INSERT AUDIENCE DESCRIPTION]
+Duration: [INSERT TIME LIMIT]
+Platform: [INSERT POLLING PLATFORM IF KNOWN]
+
+For each poll, provide:
+**Poll [#]: [Title]** 
+**Type:** [Multiple Choice/Ranking/Word Cloud/Rating]
+**Timing:** [When to deploy in session]
+**Question:** [Exact question text]
+**Options:** [If applicable]
+**Purpose:** [What this poll achieves]
+**Follow-up:** [Discussion prompt based on results]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Engagement</span>
+                                <span class="prompt-tag">Real-time</span>
+                                <span class="prompt-tag">Polling</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Gamified Knowledge Check
+                                <span class="difficulty-badge difficulty-intermediate">Intermediate</span>
+                            </div>
+                            <p class="prompt-preview">Creates game-like assessment experiences with points, badges, and progression...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Design a gamified knowledge assessment system for [TOPIC] that feels like playing a game rather than taking a test.
+
+Game Mechanics to Include:
+- Point-based scoring system with bonus opportunities
+- Achievement badges for different types of mastery
+- Progressive difficulty levels that unlock based on performance
+- Power-ups or hints that learners can earn and use
+- Leaderboard elements (if appropriate for context)
+- Immediate feedback with celebratory messages
+
+Assessment Structure:
+Subject: [INSERT SUBJECT/TOPIC]
+Target Audience: [INSERT LEARNER PROFILE]
+Session Length: [INSERT DURATION]
+Key Learning Objectives: [LIST 3-5 OBJECTIVES]
+
+Output Format:
+**Game Title:** [Catchy name]
+**Scoring System:** [Points, bonuses, penalties]
+**Level Structure:** [How difficulty progresses]
+**Badge System:** [What achievements are possible]
+**Question Bank:** [5-10 sample questions with game elements]
+**Power-ups Available:** [Hint systems, lifelines, etc.]
+**Victory Conditions:** [How learners "win"]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Gamification</span>
+                                <span class="prompt-tag">Assessment</span>
+                                <span class="prompt-tag">Engagement</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Branching Scenarios -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">🌳</span>
+                        <div class="prompt-count">8 prompts</div>
+                        <h3 class="category-title">Branching Scenarios & Decision Trees</h3>
+                        <p class="category-desc">Build complex decision-making scenarios that adapt based on learner choices</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Professional Scenario Builder
+                                <span class="difficulty-badge difficulty-advanced">Advanced</span>
+                            </div>
+                            <p class="prompt-preview">Creates realistic workplace scenarios with multiple decision points and consequences...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create a branching scenario for [PROFESSIONAL CONTEXT] that allows learners to practice [SPECIFIC SKILL] in a realistic workplace setting.
+
+Scenario Parameters:
+- 5-7 decision points with 3-4 options each
+- Realistic consequences that build upon previous choices
+- Include both obvious and subtle decision factors
+- Mix of technical and interpersonal challenges
+- Multiple possible endpoints (success, partial success, failure)
+
+Context Details:
+Industry/Field: [INSERT INDUSTRY]
+Skill Focus: [INSERT SPECIFIC SKILL/COMPETENCY]
+Complexity Level: [INSERT APPROPRIATE LEVEL]
+Character Role: [INSERT LEARNER'S ROLE IN SCENARIO]
+
+Structure Required:
+**Scenario Title:** [Engaging title]
+**Background:** [Situation setup]
+**Character Profile:** [Learner's role and constraints]
+**Decision Point 1:** [Situation description]
+  → Option A: [Choice] → [Consequence]
+  → Option B: [Choice] → [Consequence]  
+  → Option C: [Choice] → [Consequence]
+**[Continue for all decision points]**
+**Possible Endings:** [Different outcomes with explanations]
+**Debrief Questions:** [Reflection prompts for each pathway]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Workplace</span>
+                                <span class="prompt-tag">Decision Making</span>
+                                <span class="prompt-tag">Branching</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Ethical Dilemma Navigator
+                                <span class="difficulty-badge difficulty-advanced">Advanced</span>
+                            </div>
+                            <p class="prompt-preview">Constructs complex ethical scenarios with multiple stakeholder perspectives...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Design an ethical dilemma scenario for [FIELD/PROFESSION] that challenges learners to navigate competing values and stakeholder interests.
+
+Scenario Requirements:
+- Present a realistic ethical conflict with no clear "right" answer
+- Include 3-4 stakeholder groups with conflicting interests
+- Provide decision framework options (utilitarian, deontological, virtue ethics, etc.)
+- Show short-term and long-term consequences of different approaches
+- Include reflection on personal values and professional codes
+
+Ethical Context:
+Field/Profession: [INSERT CONTEXT]
+Ethical Principle Focus: [INSERT MAIN ETHICAL CHALLENGE]
+Stakeholders Involved: [INSERT KEY PARTIES]
+Complexity Factors: [LEGAL, CULTURAL, RESOURCE CONSTRAINTS]
+
+Output Structure:
+**Dilemma Title:** [Compelling title]
+**Situation Overview:** [Background and key facts]
+**Stakeholder Perspectives:**
+- [Stakeholder 1]: [Their interests and concerns]
+- [Stakeholder 2]: [Their interests and concerns]
+- [Stakeholder 3]: [Their interests and concerns]
+**Decision Options:** [3-4 possible approaches]
+**Consequence Matrix:** [What happens with each choice]
+**Reflection Framework:** [Questions to guide ethical reasoning]
+**Real-world Parallels:** [Similar cases or examples]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Ethics</span>
+                                <span class="prompt-tag">Critical Thinking</span>
+                                <span class="prompt-tag">Complex</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Simulations -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">🎮</span>
+                        <div class="prompt-count">10 prompts</div>
+                        <h3 class="category-title">Interactive Simulations</h3>
+                        <p class="category-desc">Create immersive learning experiences that simulate real-world processes and systems</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Virtual Lab Experience
+                                <span class="difficulty-badge difficulty-intermediate">Intermediate</span>
+                            </div>
+                            <p class="prompt-preview">Designs virtual laboratory experiments with realistic procedures and results...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create a virtual laboratory simulation for [SUBJECT] that allows learners to conduct [SPECIFIC EXPERIMENT/PROCEDURE] safely and repeatedly.
+
+Simulation Parameters:
+- Step-by-step procedure with branching based on choices
+- Realistic variables that affect outcomes
+- Safety considerations and error consequences
+- Data collection and analysis components
+- Multiple trial capability with different conditions
+
+Lab Context:
+Subject Area: [INSERT SUBJECT]
+Experiment/Procedure: [INSERT SPECIFIC ACTIVITY]
+Learning Objectives: [INSERT 3-5 GOALS]
+Safety Level: [INSERT RISK FACTORS TO ADDRESS]
+Equipment Needed: [INSERT VIRTUAL TOOLS]
+
+Simulation Structure:
+**Lab Title:** [Descriptive name]
+**Background:** [Why this experiment matters]
+**Pre-lab Preparation:** [Required knowledge/setup]
+**Virtual Equipment:** [Available tools and their functions]
+**Procedure Steps:** [Interactive sequence with decision points]
+**Variable Controls:** [What learners can adjust]
+**Data Collection:** [What to measure and record]
+**Analysis Prompts:** [How to interpret results]
+**Safety Alerts:** [What happens with unsafe choices]
+**Extension Activities:** [Additional experiments to try]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Laboratory</span>
+                                <span class="prompt-tag">Science</span>
+                                <span class="prompt-tag">Virtual</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Business Process Simulator
+                                <span class="difficulty-badge difficulty-advanced">Advanced</span>
+                            </div>
+                            <p class="prompt-preview">Models complex business operations with multiple variables and market conditions...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Design a business simulation that lets learners experience [BUSINESS PROCESS] with realistic market dynamics and consequences.
+
+Simulation Requirements:
+- Multiple variables that interact with each other
+- Market conditions that change over time
+- Resource constraints and budget limitations
+- Competitor actions that affect outcomes
+- Quarterly/monthly reporting cycles
+- Crisis scenarios that test adaptability
+
+Business Context:
+Industry: [INSERT INDUSTRY TYPE]
+Process Focus: [INSERT SPECIFIC BUSINESS PROCESS]
+Company Size: [INSERT SCALE - STARTUP/SMALL/LARGE]
+Market Conditions: [INSERT ECONOMIC ENVIRONMENT]
+Key Stakeholders: [INSERT RELEVANT PARTIES]
+
+Simulation Framework:
+**Company Profile:** [Learner's business context]
+**Initial Conditions:** [Starting resources, market position]
+**Decision Categories:** [What learners can control]
+**Market Variables:** [External factors that change]
+**Success Metrics:** [How performance is measured]
+**Scenario Events:** [Random/triggered challenges]
+**Reporting Dashboard:** [What data learners see]
+**Learning Checkpoints:** [When to pause for reflection]
+**Debriefing Framework:** [Post-simulation analysis]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Business</span>
+                                <span class="prompt-tag">Strategy</span>
+                                <span class="prompt-tag">Complex</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Adaptive Storytelling -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">📚</span>
+                        <div class="prompt-count">6 prompts</div>
+                        <h3 class="category-title">Adaptive Storytelling</h3>
+                        <p class="category-desc">Generate dynamic narratives that change based on learner choices and progress</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Hero's Journey Learning Adventure
+                                <span class="difficulty-badge difficulty-intermediate">Intermediate</span>
+                            </div>
+                            <p class="prompt-preview">Creates epic learning narratives where learners are the protagonist overcoming challenges...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create an interactive learning story using the Hero's Journey framework where mastering [SUBJECT/SKILL] is the quest.
+
+Story Structure Requirements:
+- Learner is the protagonist facing a meaningful challenge
+- Knowledge/skills are tools and weapons to overcome obstacles
+- Multiple paths through the story based on learner choices
+- Mentors and allies that provide guidance and resources
+- Progressive difficulty that matches skill development
+- Satisfying resolution that reinforces learning achievements
+
+Learning Context:
+Subject/Skill: [INSERT LEARNING TOPIC]
+Target Audience: [INSERT LEARNER PROFILE]
+Story Duration: [INSERT INTENDED LENGTH]
+Key Learning Objectives: [INSERT 3-5 GOALS]
+Preferred Setting: [FANTASY/SCI-FI/MODERN/HISTORICAL]
+
+Story Framework:
+**The Call to Adventure:** [How the learning journey begins]
+**Ordinary World:** [Learner's current knowledge state]
+**The Challenge:** [Main problem requiring new skills]
+**Mentor Introduction:** [Who/what guides the learning]
+**Trials and Training:** [Interactive learning activities]
+**The Ordeal:** [Major test of new knowledge]
+**The Reward:** [What mastery unlocks]
+**Return Transformed:** [How learner applies new skills]
+**Character Development:** [How learner grows through story]
+**Choice Points:** [Where story branches based on decisions]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Narrative</span>
+                                <span class="prompt-tag">Adventure</span>
+                                <span class="prompt-tag">Engagement</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Time Travel Learning Saga
+                                <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                            </div>
+                            <p class="prompt-preview">Uses historical settings and time periods to make learning contextual and memorable...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Design a time-travel story where learners visit different historical periods to understand [CONCEPT/SUBJECT] in various contexts.
+
+Narrative Requirements:
+- 3-5 historical time periods that illuminate the topic
+- Interactive elements in each era
+- Characters from each period who teach key concepts
+- Choices that affect which time periods to visit
+- Modern connections that make historical learning relevant
+- A time-travel device/mechanism that advances with learning
+
+Educational Setup:
+Subject/Concept: [INSERT TOPIC TO EXPLORE]
+Grade/Age Level: [INSERT TARGET AUDIENCE]
+Historical Periods: [INSERT RELEVANT ERAS]
+Modern Applications: [INSERT CURRENT RELEVANCE]
+
+Story Structure:
+**Time Travel Setup:** [How/why learner travels through time]
+**Time Period 1:** [Era, key characters, learning activity]
+**Time Period 2:** [Era, key characters, learning activity]
+**Time Period 3:** [Era, key characters, learning activity]
+**[Additional periods as needed]**
+**Modern Return:** [How historical knowledge applies today]
+**Choice Mechanics:** [How learner decisions affect the journey]
+**Knowledge Collection:** [What learner gathers from each era]
+**Final Integration:** [How all periods connect to main concept]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">History</span>
+                                <span class="prompt-tag">Time Travel</span>
+                                <span class="prompt-tag">Context</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Collaborative Activities -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">🤝</span>
+                        <div class="prompt-count">7 prompts</div>
+                        <h3 class="category-title">Collaborative Learning</h3>
+                        <p class="category-desc">Design group activities and peer learning experiences that leverage collective intelligence</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Virtual Team Challenge
+                                <span class="difficulty-badge difficulty-intermediate">Intermediate</span>
+                            </div>
+                            <p class="prompt-preview">Creates team-based problem solving activities with defined roles and collaborative goals...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Design a collaborative challenge where teams of 3-5 learners must work together to solve [PROBLEM/COMPLETE PROJECT] using [SUBJECT/SKILLS].
+
+Collaboration Framework:
+- Clearly defined team roles with unique responsibilities
+- Individual accountability within group success
+- Multiple communication and coordination requirements
+- Shared resources that require strategic allocation
+- Progress checkpoints that require team consensus
+- Conflict resolution scenarios built into the challenge
+
+Project Context:
+Subject/Skill Focus: [INSERT LEARNING TOPIC]
+Team Size: [INSERT PREFERRED GROUP SIZE]
+Duration: [INSERT TIME FRAME]
+Complexity Level: [INSERT DIFFICULTY]
+Available Tools: [INSERT COLLABORATION PLATFORMS]
+
+Challenge Design:
+**Challenge Title:** [Engaging project name]
+**Scenario Background:** [Context and stakes]
+**Team Roles:** [Specific responsibilities for each member]
+**Shared Goal:** [What teams must accomplish together]
+**Individual Tasks:** [What each person must contribute]
+**Resource Constraints:** [Limitations that require collaboration]
+**Decision Points:** [Where teams must reach consensus]
+**Progress Milestones:** [Checkpoints for team coordination]
+**Success Metrics:** [How teams and individuals are evaluated]
+**Reflection Protocol:** [How teams debrief their collaboration]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Teamwork</span>
+                                <span class="prompt-tag">Problem Solving</span>
+                                <span class="prompt-tag">Collaboration</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Peer Teaching Exchange
+                                <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                            </div>
+                            <p class="prompt-preview">Structures peer-to-peer learning where students teach each other different aspects of a topic...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create a peer teaching activity where learners become experts on different aspects of [TOPIC] and teach each other.
+
+Peer Teaching Structure:
+- Break complex topic into 4-6 subtopics
+- Each learner/small group becomes expert on one subtopic
+- Structured teaching rounds where experts share knowledge
+- Interactive elements for each teaching segment
+- Cross-questioning and clarification opportunities
+- Synthesis activity that brings all subtopics together
+
+Learning Context:
+Main Topic: [INSERT OVERALL SUBJECT]
+Subtopic Areas: [INSERT COMPONENT PARTS]
+Group Size: [INSERT NUMBER OF LEARNERS]
+Time Available: [INSERT SESSION LENGTH]
+Expertise Level: [INSERT STARTING KNOWLEDGE LEVEL]
+
+Activity Framework:
+**Topic Breakdown:** [How main topic divides into teachable chunks]
+**Expert Assignment:** [How learners choose/get assigned subtopics]
+**Research Phase:** [How experts prepare their teaching segment]
+**Teaching Format:** [Structure for each peer teaching round]
+**Interactive Elements:** [Activities experts use to engage peers]
+**Question Protocols:** [How other learners engage with experts]
+**Knowledge Integration:** [Final activity connecting all subtopics]
+**Peer Assessment:** [How learners evaluate each other's teaching]
+**Reflection Questions:** [What learners discovered through teaching]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Peer Learning</span>
+                                <span class="prompt-tag">Teaching</span>
+                                <span class="prompt-tag">Knowledge Sharing</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Microlearning Modules -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">⚡</span>
+                        <div class="prompt-count">9 prompts</div>
+                        <h3 class="category-title">Microlearning Modules</h3>
+                        <p class="category-desc">Generate bite-sized learning experiences perfect for busy schedules and mobile learning</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                5-Minute Skill Builder
+                                <span class="difficulty-badge difficulty-beginner">Beginner</span>
+                            </div>
+                            <p class="prompt-preview">Creates focused micro-lessons that can be completed in 5 minutes or less...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create a 5-minute microlearning module that teaches one specific aspect of [SKILL/CONCEPT] that learners can immediately apply.
+
+Microlearning Requirements:
+- Single, focused learning objective achievable in 5 minutes
+- Hook that grabs attention in first 30 seconds
+- Core content that can be absorbed quickly
+- Immediate practice opportunity
+- Clear next step or application challenge
+
+Module Specifications:
+Skill/Concept: [INSERT SPECIFIC TOPIC]
+Target Audience: [INSERT LEARNER PROFILE]
+Context of Use: [INSERT WHEN/WHERE LEARNERS WILL USE THIS]
+Prior Knowledge: [INSERT WHAT LEARNERS ALREADY KNOW]
+Success Criteria: [INSERT HOW TO MEASURE LEARNING]
+
+Module Structure:
+**Hook (30 seconds):** [Attention-grabbing opener]
+**Learning Objective:** [What learners will be able to do]
+**Core Content (2-3 minutes):** [Essential information/demonstration]
+**Quick Practice (1-2 minutes):** [Immediate application activity]
+**Key Takeaway (30 seconds):** [Main point to remember]
+**Next Step Challenge:** [How to apply this in real world]
+**Mobile Optimization Notes:** [Considerations for phone/tablet use]
+**Series Connection:** [How this connects to other modules]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Microlearning</span>
+                                <span class="prompt-tag">Quick Skills</span>
+                                <span class="prompt-tag">Mobile</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feedback & Assessment -->
+                <div class="category-card">
+                    <div class="category-header">
+                        <span class="category-icon">💬</span>
+                        <div class="prompt-count">5 prompts</div>
+                        <h3 class="category-title">Dynamic Feedback Systems</h3>
+                        <p class="category-desc">Create intelligent feedback mechanisms that adapt to learner performance and provide personalized guidance</p>
+                    </div>
+                    <div class="prompt-list">
+                        <div class="prompt-item" onclick="togglePrompt(this)">
+                            <div class="prompt-title">
+                                Adaptive Feedback Generator
+                                <span class="difficulty-badge difficulty-advanced">Advanced</span>
+                            </div>
+                            <p class="prompt-preview">Produces personalized feedback that adapts based on learner performance patterns and needs...</p>
+                            <div class="prompt-full">
+                                <button class="copy-btn" onclick="copyToClipboard(this)">📋 Copy</button>
+Create an adaptive feedback system for [LEARNING ACTIVITY] that provides personalized responses based on learner performance patterns.
+
+Feedback System Requirements:
+- Multiple feedback types based on performance level
+- Encouraging messages that maintain motivation
+- Specific guidance for improvement areas
+- Recognition of progress and effort
+- Hints and scaffolding for struggling learners
+- Extension challenges for advanced learners
+
+Learning Context:
+Activity Type: [INSERT SPECIFIC LEARNING ACTIVITY]
+Subject Area: [INSERT CONTENT DOMAIN]
+Assessment Method: [INSERT HOW PERFORMANCE IS MEASURED]
+Learner Diversity: [INSERT RANGE OF ABILITIES/BACKGROUNDS]
+
+Feedback Framework:
+**High Performance (90%+):**
+- Celebration Message: [Recognition of excellence]
+- Extension Challenge: [Additional complexity to explore]
+- Peer Mentoring Opportunity: [How to help others]
+
+**Good Performance (70-89%):**
+- Positive Reinforcement: [Acknowledgment of solid work]
+- Refinement Suggestion: [Small improvements to consider]
+- Next Level Preview: [What comes next in learning]
+
+**Developing Performance (50-69%):**
+- Encouraging Message: [Supportive tone about growth]
+- Specific Guidance: [Targeted areas for improvement]
+- Resource Suggestions: [Additional help available]
+
+**Struggling Performance (<50%):**
+- Supportive Message: [Emphasis on learning process]
+- Scaffolding Hints: [Step-by-step support]
+- Alternative Approaches: [Different ways to learn this content]
+
+**Behavioral Adaptations:**
+- For Quick Finishers: [Additional depth/breadth]
+- For Slow/Careful Workers: [Patience and encouragement]
+- For Multiple Attempts: [Progressive hint system]
+                            </div>
+                            <div class="prompt-tags">
+                                <span class="prompt-tag">Adaptive</span>
+                                <span class="prompt-tag">Personalized</span>
+                                <span class="prompt-tag">Feedback</span>
+                            </div>
+                            <button class="expand-btn">Show Full Prompt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips and Best Practices -->
+            <div class="tips-section">
+                <h2 class="tips-title">💡 AI Prompt Engineering Tips</h2>
+                <div class="tip-grid">
+                    <div class="tip-item">
+                        <h4>Be Specific About Context</h4>
+                        <p>Include target audience, learning objectives, time constraints, and platform details in your prompts for more relevant outputs.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Request Multiple Formats</h4>
+                        <p>Ask for content in different formats (text, visual descriptions, interaction scripts) to create richer learning experiences.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Include Assessment Criteria</h4>
+                        <p>Always specify how learner success should be measured and what good performance looks like.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Test and Iterate</h4>
+                        <p>Use generated content with real learners and refine your prompts based on what works and what doesn't.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Combine Multiple Prompts</h4>
+                        <p>Use different prompts for different aspects of your activity (content, assessment, feedback) then integrate the results.</p>
+                    </div>
+                    <div class="tip-item">
+                        <h4>Consider Accessibility</h4>
+                        <p>Include accessibility requirements in your prompts to ensure inclusive learning experiences from the start.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Start Guide -->
+            <div class="quick-start">
+                <h2>🚀 Ready to Create Interactive Learning?</h2>
+                <p>Choose a prompt category above, customize it for your specific needs, and start building engaging educational experiences with AI assistance!</p>
+                <div class="action-buttons">
+                    <button class="action-btn" onclick="window.print()">📄 Print Library</button>
+                    <button class="action-btn" onclick="exportPrompts()">💾 Export Favorites</button>
+                    <button class="action-btn" onclick="showCustomizer()">⚙️ Prompt Customizer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePrompt(element) {
+            const promptFull = element.querySelector('.prompt-full');
+            const button = element.querySelector('.expand-btn');
+            
+            if (promptFull.style.display === 'none' || promptFull.style.display === '') {
+                promptFull.style.display = 'block';
+                button.textContent = 'Hide Full Prompt';
+                element.style.background = 'linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%)';
+            } else {
+                promptFull.style.display = 'none';
+                button.textContent = 'Show Full Prompt';
+                element.style.background = 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)';
+            }
+        }
+        
+        function copyToClipboard(button) {
+            const promptText = button.parentElement.textContent.replace('📋 Copy', '').trim();
+            navigator.clipboard.writeText(promptText).then(() => {
+                button.textContent = '✅ Copied!';
+                button.style.background = '#10b981';
+                setTimeout(() => {
+                    button.textContent = '📋 Copy';
+                    button.style.background = '#667eea';
+                }, 2000);
+            });
+        }
+        
+        function filterPrompts(category) {
+            // Remove active class from all filter tags
+            document.querySelectorAll('.filter-tag').forEach(tag => {
+                tag.classList.remove('active');
+            });
+            
+            // Add active class to clicked tag
+            event.target.classList.add('active');
+            
+            // This would implement actual filtering logic
+            console.log('Filtering by:', category);
+        }
+        
+        function exportPrompts() {
+            alert('Export functionality would allow users to save their favorite prompts as a downloadable file.');
+        }
+        
+        function showCustomizer() {
+            alert('Prompt Customizer would provide a guided interface for personalizing prompts to specific contexts and needs.');
+        }
+        
+        // Search functionality
+        document.querySelector('.search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            // This would implement search filtering across all prompts
+            console.log('Searching for:', searchTerm);
+        });
+        
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
