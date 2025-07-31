@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Microlearning Module Designer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #48dbfb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shine 2s infinite;
+        }
+        
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .time-indicator {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50px;
+            padding: 10px 20px;
+            display: inline-block;
+            margin-top: 20px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .content {
+            padding: 50px;
+        }
+        
+        .module-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+            transition: all 0.4s ease;
+        }
+        
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c);
+            border-radius: 20px;
+            z-index: -1;
+            padding: 3px;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        .module-card:hover::before {
+            opacity: 1;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+        
+        .step-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .card-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2d3748;
+            flex: 1;
+        }
+        
+        .duration-badge {
+            background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(254, 202, 87, 0.3);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .form-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .form-section:hover {
+            border-color: #667eea;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+        
+        .form-section h3 {
+            color: #667eea;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-icon {
+            font-size: 1.4rem;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: white;
+            font-family: inherit;
+        }
+        
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .checkbox-item:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #667eea;
+        }
+        
+        .ai-assistant {
+            background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ai-assistant::before {
+            content: '🤖';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+        
+        .ai-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .ai-content {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .progress-bar {
+            background: #e2e8f0;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .activity-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .activity-option {
+            background: white;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 25px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .activity-option::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+        
+        .activity-option:hover::before {
+            left: 100%;
+        }
+        
+        .activity-option:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+        }
+        
+        .activity-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+        }
+        
+        .activity-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .activity-name {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+        
+        .activity-desc {
+            font-size: 0.9rem;
+            color: #718096;
+            line-height: 1.4;
+        }
+        
+        .timeline {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            margin: 30px 0;
+        }
+        
+        .timeline h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .timeline-items {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .timeline-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .timeline-duration {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-phase {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .export-section {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 40px;
+        }
+        
+        .export-btn {
+            background: white;
+            color: #56ab2f;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin: 0 10px;
+        }
+        
+        .export-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tip-box {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .tip-box::before {
+            content: '💡';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: #fdcb6e;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+        }
+        
+        .tip-title {
+            font-weight: 700;
+            color: #d63031;
+            margin-bottom: 10px;
+            margin-left: 20px;
+        }
+        
+        .tip-content {
+            color: #2d3436;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 768px) {
+            .content { padding: 30px 20px; }
+            .header { padding: 30px 20px; }
+            .header h1 { font-size: 2rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .timeline-items { flex-direction: column; }
+        }
+        
+        @media print {
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; }
+            .export-btn { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚡ Microlearning Module Designer</h1>
+            <p>Create bite-sized, engaging learning experiences with AI assistance</p>
+            <div class="time-indicator">🕐 Optimal Duration: 3-7 minutes</div>
+        </div>
+        
+        <div class="content">
+            <!-- Module Overview -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">1</div>
+                    <div class="card-title">Module Foundation</div>
+                    <div class="duration-badge">Planning Phase</div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3><span class="section-icon">🎯</span>Learning Objective</h3>
+                        <div class="form-group">
+                            <label class="form-label">Single, Focused Learning Goal</label>
+                            <textarea class="form-textarea" placeholder="What ONE thing should learners be able to do after completing this module?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Success Criteria</label>
+                            <input type="text" class="form-input" placeholder="How will you know they've achieved the goal?">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3><span class="section-icon">👥</span>Target Audience</h3>
+                        <div class="form-group">
+                            <label class="form-label">Learner Profile</label>
+                            <select class="form-select">
+                                <option>Complete Beginners</option>
+                                <option>Some Experience</option>
+                                <option>Intermediate Level</option>
+                                <option>Advanced Users</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Context & Motivation</label>
+                            <textarea class="form-textarea" placeholder="When and why will they use this knowledge?"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tip-box">
+                    <div class="tip-title">💡 Microlearning Tip</div>
+                    <div class="tip-content">Focus on ONE specific skill or concept. If you can't explain the goal in one sentence, consider breaking it into multiple modules.</div>
+                </div>
+            </div>
+
+            <!-- Content Structure -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">2</div>
+                    <div class="card-title">Content Architecture</div>
+                    <div class="duration-badge">3-7 Minutes</div>
+                </div>
+                
+                <div class="timeline">
+                    <h3>⏱️ Microlearning Timeline</h3>
+                    <div class="timeline-items">
+                        <div class="timeline-item">
+                            <div class="timeline-duration">30s</div>
+                            <div class="timeline-phase">Hook & Context</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-duration">1-2m</div>
+                            <div class="timeline-phase">Core Content</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-duration">1-2m</div>
+                            <div class="timeline-phase">Practice</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-duration">30s</div>
+                            <div class="timeline-phase">Summary</div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-duration">1m</div>
+                            <div class="timeline-phase">Next Steps</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3><span class="section-icon">🪝</span>Opening Hook</h3>
+                        <div class="form-group">
+                            <label class="form-label">Attention Grabber</label>
+                            <select class="form-select">
+                                <option>Surprising Statistic</option>
+                                <option>Thought-Provoking Question</option>
+                                <option>Real-World Scenario</option>
+                                <option>Common Mistake</option>
+                                <option>Personal Story</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Hook Content</label>
+                            <textarea class="form-textarea" placeholder="Write your specific hook content here..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3><span class="section-icon">📚</span>Core Content</h3>
+                        <div class="form-group">
+                            <label class="form-label">Key Concept</label>
+                            <textarea class="form-textarea" placeholder="The main idea you're teaching (keep it simple and focused)"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Explanation Method</label>
+                            <select class="form-select">
+                                <option>Step-by-step Process</option>
+                                <option>Analogy/Metaphor</option>
+                                <option>Visual Demonstration</option>
+                                <option>Before/After Comparison</option>
+                                <option>Rule with Examples</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Elements -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">3</div>
+                    <div class="card-title">Interactive Practice</div>
+                    <div class="duration-badge">Engagement</div>
+                </div>
+                
+                <div class="activity-picker">
+                    <div class="activity-option" onclick="toggleSelection(this)">
+                        <span class="activity-icon">❓</span>
+                        <div class="activity-name">Quick Quiz</div>
+                        <div class="activity-desc">2-3 multiple choice or true/false questions</div>
+                    </div>
+                    <div class="activity-option" onclick="toggleSelection(this)">
+                        <span class="activity-icon">🧩</span>
+                        <div class="activity-name">Drag & Drop</div>
+                        <div class="activity-desc">Match concepts, order steps, categorize items</div>
+                    </div>
+                    <div class="activity-option" onclick="toggleSelection(this)">
+                        <span class="activity-icon">💭</span>
+                        <div class="activity-name">Scenario Response</div>
+                        <div class="activity-desc">"What would you do?" situation</div>
+                    </div>
+                    <div class="activity-option" onclick="toggleSelection(this)">
+                        <span class="activity-icon">✍️</span>
+                        <div class="activity-name">Quick Reflection</div>
+                        <div class="activity-desc">One thought-provoking question</div>
+                    </div>
+                    <div class="activity-option" onclick="toggleSelection(this)">
+                        <span class="activity-icon">🎯</span>
+                        <div class="activity-name">Practice Task</div>
+                        <div class="activity-desc">Apply the concept immediately</div>
+                    </div>
+                    <div class="activity-option" onclick="toggleSelection(this)">
+                        <span class="activity-icon">🔍</span>
+                        <div class="activity-name">Find the Error</div>
+                        <div class="activity-desc">Identify mistakes in examples</div>
+                    </div>
+                </div>
+                
+                <div class="form-section" style="margin-top: 30px;">
+                    <h3><span class="section-icon">⚡</span>Activity Details</h3>
+                    <div class="form-group">
+                        <label class="form-label">Specific Activity Instructions</label>
+                        <textarea class="form-textarea" placeholder="Describe exactly what learners will do in your chosen interactive element..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Immediate Feedback</label>
+                        <textarea class="form-textarea" placeholder="What feedback will learners receive right away?"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Integration -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">4</div>
+                    <div class="card-title">AI-Powered Personalization</div>
+                    <div class="duration-badge">Smart Features</div>
+                </div>
+                
+                <div class="ai-assistant">
+                    <div class="ai-title">🤖 AI Content Generator</div>
+                    <div class="ai-content">
+                        <div class="form-group">
+                            <label class="form-label" style="color: white;">AI Prompt for Content Creation</label>
+                            <textarea class="form-textarea" style="background: rgba(255,255,255,0.9);" placeholder="Create a prompt that instructs AI to generate your microlearning content. Include audience, tone, format, and specific requirements..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3><span class="section-icon">🎨</span>Content Variations</h3>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="visual">
+                                <label for="visual">Visual Learners</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="auditory">
+                                <label for="auditory">Auditory Learners</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="reading">
+                                <label for="reading">Reading/Writing</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="kinesthetic">
+                                <label for="kinesthetic">Hands-on Practice</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3><span class="section-icon">📊</span>Adaptive Features</h3>
+                        <div class="form-group">
+                            <label class="form-label">Performance Tracking</label>
+                            <select class="form-select">
+                                <option>Completion Rate</option>
+                                <option>Accuracy Score</option>
+                                <option>Time to Complete</option>
+                                <option>Engagement Level</option>
+                                <option>All of the Above</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Remediation Strategy</label>
+                            <textarea class="form-textarea" placeholder="What happens if learners struggle with the content?"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment & Reinforcement -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">5</div>
+                    <div class="card-title">Knowledge Check & Reinforcement</div>
+                    <div class="duration-badge">Retention</div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3><span class="section-icon">✅</span>Micro-Assessment</h3>
+                        <div class="form-group">
+                            <label class="form-label">Knowledge Check Format</label>
+                            <select class="form-select">
+                                <option>Single Best Answer</option>
+                                <option>True/False with Explanation</option>
+                                <option>Fill in the Blank</option>
+                                <option>Matching Exercise</option>
+                                <option>Scenario Judgment</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Assessment Question</label>
+                            <textarea class="form-textarea" placeholder="Write your specific assessment question here..."></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3><span class="section-icon">🔄</span>Spaced Repetition</h3>
+                        <div class="form-group">
+                            <label class="form-label">Follow-up Schedule</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="day1">
+                                    <label for="day1">Next Day</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="week1">
+                                    <label for="week1">1 Week Later</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="month1">
+                                    <label for="month1">1 Month Later</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reinforcement Method</label>
+                            <textarea class="form-textarea" placeholder="How will you reinforce this learning over time?"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Connection & Next Steps -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">6</div>
+                    <div class="card-title">Learning Journey Connection</div>
+                    <div class="duration-badge">Pathway</div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3><span class="section-icon">🔗</span>Module Connections</h3>
+                        <div class="form-group">
+                            <label class="form-label">Previous Module Link</label>
+                            <input type="text" class="form-input" placeholder="How does this connect to what they learned before?">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Next Module Preview</label>
+                            <input type="text" class="form-input" placeholder="What exciting topic comes next?">
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3><span class="section-icon">🚀</span>Immediate Application</h3>
+                        <div class="form-group">
+                            <label class="form-label">Real-World Challenge</label>
+                            <textarea class="form-textarea" placeholder="What can they try right now with this new knowledge?"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Success Criteria</label>
+                            <input type="text" class="form-input" placeholder="How will they know they've successfully applied it?">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tip-box">
+                    <div class="tip-title">💡 Engagement Tip</div>
+                    <div class="tip-content">End with momentum! Give learners something specific they can do immediately to apply their new knowledge. This creates a bridge between learning and doing.</div>
+                </div>
+            </div>
+
+            <!-- Technical Implementation -->
+            <div class="module-card">
+                <div class="card-header">
+                    <div class="step-number">7</div>
+                    <div class="card-title">Technical Specifications</div>
+                    <div class="duration-badge">Implementation</div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-section">
+                        <h3><span class="section-icon">📱</span>Delivery Platform</h3>
+                        <div class="form-group">
+                            <label class="form-label">Primary Platform</label>
+                            <select class="form-select">
+                                <option>Learning Management System</option>
+                                <option>Mobile App</option>
+                                <option>Web Browser</option>
+                                <option>Email Series</option>
+                                <option>Social Learning Platform</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Device Optimization</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="mobile">
+                                    <label for="mobile">Mobile First</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="desktop">
+                                    <label for="desktop">Desktop</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="tablet">
+                                    <label for="tablet">Tablet</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-section">
+                        <h3><span class="section-icon">📊</span>Analytics & Tracking</h3>
+                        <div class="form-group">
+                            <label class="form-label">Key Metrics to Track</label>
+                            <div class="checkbox-group">
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="completion">
+                                    <label for="completion">Completion Rate</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="time">
+                                    <label for="time">Time Spent</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="accuracy">
+                                    <label for="accuracy">Assessment Accuracy</label>
+                                </div>
+                                <div class="checkbox-item">
+                                    <input type="checkbox" id="engagement">
+                                    <label for="engagement">Interaction Level</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Success Threshold</label>
+                            <input type="text" class="form-input" placeholder="e.g., 80% completion rate, <5 min duration">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Export Section -->
+            <div class="export-section">
+                <h2 style="color: white; margin-bottom: 20px;">📋 Ready to Build Your Microlearning Module?</h2>
+                <p style="color: white; margin-bottom: 30px; font-size: 1.1rem;">Export your design template and start creating engaging bite-sized learning experiences!</p>
+                <button class="export-btn" onclick="window.print()">📄 Export Template</button>
+                <button class="export-btn" onclick="generateSummary()">📋 Generate Summary</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSelection(element) {
+            element.classList.toggle('selected');
+        }
+        
+        function generateSummary() {
+            alert('Summary generation feature would create a concise overview of your microlearning module design, including timeline, activities, and technical requirements.');
+        }
+        
+        // Add some interactive progress tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputs = document.querySelectorAll('input, textarea, select');
+            const progressBar = document.querySelector('.progress-fill');
+            
+            if (progressBar) {
+                function updateProgress() {
+                    const filledInputs = Array.from(inputs).filter(input => 
+                        input.type === 'checkbox' ? input.checked : input.value.trim() !== ''
+                    );
+                    const progressPercent = (filledInputs.length / inputs.length) * 100;
+                    progressBar.style.width = progressPercent + '%';
+                }
+                
+                inputs.forEach(input => {
+                    input.addEventListener('input', updateProgress);
+                    input.addEventListener('change', updateProgress);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
